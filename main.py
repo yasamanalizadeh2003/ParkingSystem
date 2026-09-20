@@ -1,8 +1,15 @@
 from parking import *
 from vehicle import *
 from persian import *
+import re
 parking=ParkingLot()
-
+def plate_validation(plate):
+    if not plate:
+        raise ValueError(rtl("پلاک خالی است"))
+    pattern=r"\d{2}[بجدرسصطقلمنوهی]\d{5}"
+    if not re.fullmatch(pattern,plate):
+        raise ValueError(rtl("پلاک نامعتبر است")) 
+           
 while True:
     print("______________________________________________________________")
     task=input(rtl("چه کاری میخواهید انجام دهید؟ شماره کار مورد نظر را وارد کنید\n 1.ثبت جایگاه در پارکینگ  \n 2.حذف جایگاه" \
@@ -73,6 +80,11 @@ while True:
 
     elif task==5:
         plate=input(rtl("پلاک را وارد کنید"))
+        try:
+            plate_validation(plate)
+        except ValueError as error:
+            print(error)
+            continue
         hour=input(rtl("ساعات توقف را وارد کنید"))  
         try:
             hour=int(hour)
@@ -87,6 +99,12 @@ while True:
         parking.show_parked_vehicles()
     elif task==7:
         plate=input(rtl("پلاک را وارد کنید"))
+        try:
+            plate_validation(plate)
+        except ValueError as error:
+            print(error)
+            continue
+
         hour=input(rtl("ساعات توقف را وارد کنید"))  
         try:
             hour=int(hour)
