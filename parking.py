@@ -1,4 +1,5 @@
 from vehicle import *
+from persian import *
 class ParkingSpot():
    id=1
    def __init__(self ,is_occupied=False ,parked_vehicle=None ,hourly_rate=0 ):
@@ -21,41 +22,49 @@ class ParkingLot():
        self.spots=list()
     def add_spot(self): 
        while True:
-         spot_type=input("if it's a car spot write car, if it's a motorcycle spot write motor. if you want to exit click enter")
-         if spot_type=="car" or spot_type=="motor":
-            if spot_type=="car":
-               car=CarSpot()
-               self.spots.append(car)
-            elif spot_type=="motor":
-               motor=MotorcycleSpot()
-               self.spots.append(motor)
+         spot_type=input(rtl("اگر جایگاه مربوط به ماشین است 1 را وارد کنید و اگر جایگاه مربوط به موتور است 2 را وارد کنید."
+         "اگر میخواهید خارج شوید دکمه enter را بزنید"))
+         if spot_type=="":
+            break
+         try:
+            spot_type=int(spot_type)
+         except (ValueError,TypeError):
+            print(rtl("کار مورد نظر یافت نشد"))
+            continue
+         
+         if spot_type==1 or spot_type==2:
+            if spot_type==1:
+               car_spot=CarSpot()
+               self.spots.append(car_spot)
+            elif spot_type==2:
+               motor_spot=MotorcycleSpot()
+               self.spots.append(motor_spot)
          else:
-            break 
+            print(rtl("فقط عدد 1 یا 2 را وارد کنید"))
+            continue
+
     def find_spot(self,id):
          for spot in self.spots:
             if spot.spot_id==id:
                return spot
-         else:
-            print("جایگاه پیدا نشد")   
-
     def remove_spot(self,id):
       if self.spots:
          selected_spot=self.find_spot(id)
          if selected_spot==None:
-            print("جایگاه مورد نظر وجود ندارد")
+            print(rtl("جایگاه مورد نظر وجود ندارد"))
          elif selected_spot.is_occupied==True:
-            print("جایگاه پر است") 
+            print(rtl("جایگاه پر است")) 
          else:   
             self.spots.remove(selected_spot)
-            print("جایگاه حذف شد")
+            print(rtl("جایگاه حذف شد"))
       else:
-          print("جایگاهی در پارکینگ وجود ندارد")
+          print(rtl("جایگاهی در پارکینگ وجود ندارد"))
 
     def show_free_spots(self):
        free_spots=list()
        for spot in self.spots:
           if spot.is_occupied==False:
-             free_spots.append({"id":spot.spot_id})
+             free_spots.append({"id":spot.spot_id,"type":type(spot).__name__})
        return free_spots 
      
     def find_vehicle(self,plate):
@@ -64,49 +73,55 @@ class ParkingLot():
             return spot
                
     def enter_vehicle(self,vehicle):
+         if self.find_vehicle(vehicle.plate_number)!=None:
+            print(rtl("وسیله نقلیه در پارکینگ ، پارک شده است"))
+            return
          for spot in self.spots:
-            if spot.parked_vehicle!= None:
-               continue
-            elif spot.is_occupied==True:
+            if spot.parked_vehicle!= None or spot.is_occupied==True:
                continue
             elif isinstance(vehicle,Car) and isinstance(spot,CarSpot):
-                  print("ورود ماشین انجام شد")
+                  print(rtl("ورود ماشین انجام شد"))
                   spot.is_occupied=True
                   spot.parked_vehicle=vehicle
                   vehicle.entry_status="enter"
                   break
             elif isinstance(vehicle,Motorcycle) and isinstance(spot,MotorcycleSpot):
-                  print("ورود موتور انجام شد")
+                  print(rtl("ورود موتور انجام شد"))
                   spot.is_occupied=True
                   spot.parked_vehicle=vehicle
                   vehicle.entry_status="enter"
                   break
          else:
-            print("جایگاه مناسبی وجود ندارد")   
-    def exit(self,plate):
+            print(rtl("جایگاه مناسبی وجود ندارد"))   
+    def exit(self,plate,hour):
       selected_spot=self.find_vehicle(plate) 
       if selected_spot:
-         print(f"خروج پلاک {plate} انجام شد")
+         self.final_cost(plate,hour)
+         print(rtl(f"خروج پلاک {plate} انجام شد"))
          selected_spot.is_occupied=False
          selected_spot.parked_vehicle.entry_status="exit"
          selected_spot.parked_vehicle=None
       else:
-         print("ماشین پیدا نشد") 
+         print(rtl("وسیله نقلیه پیدا نشد")) 
     def show_parked_vehicles(self):
       parked_vehicles=list()
       for spot in self.spots:
          if spot.is_occupied==True:
-            parked_vehicles.append({"plate":spot.parked_vehicle.plate_number,"owner name":spot.parked_vehicle.owner_name})
-      return parked_vehicles   
+            parked_vehicles.append({rtl("پلاک"):spot.parked_vehicle.plate_number,rtl("نوع وسیله"):type(spot.parked_vehicle).__name__})
+      print(parked_vehicles )  
 
     def final_cost(self,plate,hour):
+       if hour < 0:
+        print(rtl("ساعت توقف نمی‌تواند منفی باشد"))
+        return
        selected_spot=self.find_vehicle(plate)
        constatnt_cost=10000
        if selected_spot==None:
-          return("وسیله موردنظر موجود نیست")
+          print(rtl("وسیله موردنظر موجود نیست"))
+          return
        elif hour<5:
-         return constatnt_cost+selected_spot.hourly_rate*hour
+         print(constatnt_cost+selected_spot.hourly_rate*hour)
        else:
          jarime=50000
-         return constatnt_cost+selected_spot.hourly_rate*hour + jarime
+         print(constatnt_cost+selected_spot.hourly_rate*hour + jarime) 
           
